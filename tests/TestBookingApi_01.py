@@ -4,7 +4,7 @@ from random import randint
 class TestBookingApi:
 
     def __init__(self):
-        self.booker = API(host="http://fakerestapi.azurewebsites.net", request_headers={})
+        self.booker = Api(host="http://fakerestapi.azurewebsites.net", request_headers={})
 
     def main(self):
         print("Testing booking API")
