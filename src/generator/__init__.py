@@ -1,2 +1,2 @@
-from .generator import *
 from .YamlDataClass import *
+from .generator import *

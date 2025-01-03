@@ -23,9 +23,11 @@ if __name__ == "__main__":
 
     definitions:
       User:
+        description: Simple class representing a user
         properties:
           id:
             type: integer
+            description: User ID number
           name:
             type: string
         # Both properties are required
@@ -36,11 +38,13 @@ if __name__ == "__main__":
 
     generator = Generator()
     generated_class_definitions = generator.from_string(simple_spec)
+    print(generated_class_definitions)
 
     compiled = compile(generated_class_definitions, '', 'exec')
     module = ModuleType("testmodule")
     exec(compiled)
     user = User(name='Richard D. James', id=18081971)
 
+    print(User.__doc__)
     assert user.id == 18081971
     assert user.name == 'Richard D. James'
