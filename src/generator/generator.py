@@ -154,7 +154,7 @@ class Generator:
 
     def openapi_type_to_item_type(self, properties: dict) -> ItemType:
         if "$ref" in properties:
-            return ItemType(data_type=DataType.REF, type_string=properties["$ref"])
+            return ItemType(data_type=DataType.REF, type_string=properties["$ref"].replace(' ', '_'))
         elif "type" in properties:
             return ItemType(data_type=DataType.BASIC, type_string=properties["type"])
         else:
@@ -172,6 +172,7 @@ class Generator:
         for name, schema in definitions.items():
             name = name.split('.')
             class_name = name[-1]
+            class_name = class_name.replace(' ', '_')
             if class_name in self.fixed_class_definitions:
                 result.append(self.fixed_class_definitions[class_name])
                 continue
@@ -234,13 +235,13 @@ class Generator:
                 query_parameters.append(Parameter(
                     name=parameter['name'],
                     type=map_item_type(self.openapi_type_to_item_type(parameter['schema'])),
-                    required=parameter['required']
+                    required=parameter.get('required') or False
                 ))
         return path_parameters, query_parameters
 
     def __get_type_schema_from_content__(self, content: dict) -> dict | None:
         if self.response_content_type in content:
-            return content[self.response_content_type]
+            return content[self.response_content_type].get("schema")
         for key in content:
             if key.startswith(self.response_content_type):
                 return content[key].get("schema")
@@ -255,11 +256,14 @@ class Generator:
                     f"Warning: Generation only supports posts/patches with {self.response_content_type} content. "
                     f"Skipping: {method.upper()} {methoddef}")
                 return None
+            field_type = self.openapi_type_to_item_type(openapi_type_properties)
+            array_type = None
+            if field_type.data_type == DataType.BASIC and field_type.type_string == 'array':
+                array_type = self.openapi_type_to_item_type(openapi_type_properties["items"])
 
             return PythonProgramClassField(
                 name="data",
-                type_string=map_item_type(
-                    self.openapi_type_to_item_type(openapi_type_properties)))
+                type_string=map_item_type(field_type, array_type))
         return None
 
     def __get_return_type__(self, method: str, methoddef: dict) -> (ItemType | None, ItemType | None):
