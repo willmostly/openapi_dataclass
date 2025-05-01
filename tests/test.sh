@@ -6,4 +6,9 @@ for test in Test*.py; do
   fi
 done;
 
+if [ ${return} -ne 0 ]; then
+  echo "FAIL!"
+else
+  echo "SUCCESS!"
+fi
 exit ${return}
